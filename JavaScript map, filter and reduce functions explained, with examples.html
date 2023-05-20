@@ -1,0 +1,596 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 6.4.7.2 (Linux)"/>
+	<meta name="created" content="2023-05-20T09:41:14.203179318"/>
+	<meta name="changed" content="2023-05-20T10:25:07.855546790"/>
+	<style type="text/css">
+		pre.cjk { font-family: "Noto Sans Mono CJK SC", monospace }
+		h2.cjk { font-family: "Noto Serif CJK SC" }
+		h2.ctl { font-family: "Lohit Devanagari" }
+		code.cjk { font-family: "Noto Sans Mono CJK SC", monospace }
+	</style>
+</head>
+<body lang="en-CA" dir="ltr"><h1><font size="4" style="font-size: 14pt">JavaScript
+map, filter and reduce functions explained, with examples</font></h1>
+<p><a href="https://www.willtaylor.blog/javascript-map-filter-reduce/"><font size="3" style="font-size: 12pt">https://www.willtaylor.blog/javascript-map-filter-reduce/</font></a></p>
+<p><font size="3" style="font-size: 12pt">In this article I will
+explain, with examples, when and why you should use </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">,
+</font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+in your JavaScript code. I will show you how these methods can make
+your code more declarative and readable, and also act as a gateway
+for getting into that functional programming mindset.</font></p>
+<p><font size="3" style="font-size: 12pt">First, we will work through
+a simple example application, written with </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> loops. We
+will then rewrite this example using </font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">,
+and then rewrite it again using </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">.
+I will discuss the readability and performance of these solutions,
+and also mention some of the cases where you may actually be better
+off using </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt">.</font></p>
+<p><font size="3" style="font-size: 12pt">Finally, we will take a
+look at some of the use cases for the most complex of these 3 array
+methods,</font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">.</font></p>
+<p><font size="3" style="font-size: 12pt">If after reading this
+article you would like to dive further into learning about JavaScript
+arrays, I recommend enroling on the Udemy course (affiliate link),
+<a href="https://click.linksynergy.com/link?id=5FPU6FRy5w4&amp;offerid=507388.2497482&amp;type=2&amp;murl=https%3A%2F%2Fwww.udemy.com%2Fcourse%2Fmastering-javascript-arrays%2F">Mastering
+JavaScript Arrays</a>.</font></p>
+<h1><a name="an-example-application-albert-einstein-quotes"></a><font size="3" style="font-size: 12pt">An
+example application: Albert Einstein quotes</font></h1>
+<p><font size="3" style="font-size: 12pt">We are going to build a
+very simple example application. It is a web page which fetches some
+famous quotes from <a href="https://quote-garden.herokuapp.com/quotes/all">an
+API endpoint</a>, processes this data to extract the quotes of Albert
+Einstein, and then renders these in the DOM.</font></p>
+<p><font size="3" style="font-size: 12pt">The full example is
+available <a href="https://stackblitz.com/edit/es6-filtermapreduce">on
+StackBlitz</a>.</font></p>
+<p><font size="3" style="font-size: 12pt">For the purpose of this
+section, we will be looking at one particular function from this
+StackBlitz example, </font><code class="western"><font size="3" style="font-size: 12pt">getEinsteinQuotes</font></code><font size="3" style="font-size: 12pt">.
+The purpose of this function is to take an array of quote objects,
+which will be structured like this:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">[</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">{</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">quoteText: 'I never think of the future. It comes soon enough.',</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">quoteAuthor: 'Albert Einstein',</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">},</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">{</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">quoteText: 'In the middle of every difficulty lies opportunity.',</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">quoteAuthor: 'Albert Einstein',</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">},</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">{</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">quoteText: 'Courage is going from failure to failure without losing enthusiasm.',</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">quoteAuthor: 'Winston Churchill'</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">}</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">]</font></code></pre><p>
+<font size="3" style="font-size: 12pt">And return an array of just
+the </font><code class="western"><font size="3" style="font-size: 12pt">quoteText</font></code><font size="3" style="font-size: 12pt">
+of each Einstein quote, like this:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">[</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">'I never think of the future. It comes soon enough.',</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">'In the middle of every difficulty lies opportunity.',</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">]</font></code></pre><p>
+<font size="3" style="font-size: 12pt">When iterating over arrays,
+many developers immediately reach for </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">,
+</font><code class="western"><font size="3" style="font-size: 12pt">forEach</font></code><font size="3" style="font-size: 12pt">
+or </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt">. These
+constructs have their uses, but often result code which is
+imperative, verbose and difficult to read and reason about.</font></p>
+<p><font size="3" style="font-size: 12pt">Here, we will first look at
+how to implement this </font><code class="western"><font size="3" style="font-size: 12pt">getEinsteinQuotes</font></code><font size="3" style="font-size: 12pt">
+function using </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">,
+and then </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt">, before
+continuing on to see how we can implement the same function using
+</font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">,
+</font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">.</font></p>
+<h2 class="western"><a name="first-attempt-for-loop"></a><font size="3" style="font-size: 12pt">First
+attempt: for loop</font></h2>
+<p><font size="3" style="font-size: 12pt">First we will see how we
+can solve this problem using a </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">
+loop:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">/**</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">* Loop over the data with a for loop, use an if statement in </font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">* order to push only the items we want to an array.</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">*/</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">function getEinsteinQuotes(quotes) {</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">const einsteinQuotes = [];</font></code>
+
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">for (let i = 0; i &lt; quotes.length; i++) {</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">const quote = quotes[i];</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">if (quote.quoteAuthor.includes('Einstein')) {</font></code>
+<code class="western">      </code><code class="western"><font size="3" style="font-size: 12pt">einsteinQuotes.push(quote.quoteText);</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">}</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">}</font></code>
+
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">return einsteinQuotes;</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">}</font></code></pre><p>
+<font size="3" style="font-size: 12pt">This code certainly works, but
+it has its problems.</font></p>
+<p><font size="3" style="font-size: 12pt">It is highly unreadable,
+and contains an unnecessary amount of code, both of which will lead
+to more mistakes and hence more bugs both during implementation and
+maintenance. In particular, much of the logic is concerned with low
+level details of working with arrays:</font></p>
+<ul>
+	<li><p style="margin-bottom: 0cm"><code class="western"><font size="3" style="font-size: 12pt">let
+	i = 0; i &lt; quotes.length; i++</font></code><font size="3" style="font-size: 12pt">
+	is specifying how to handle the control flow of our for loop, ie.
+	how to loop over the array. </font>
+	</p>
+	<li><p><code class="western"><font size="3" style="font-size: 12pt">const
+	einsteinQuotes = [];</font></code><font size="3" style="font-size: 12pt">,
+	and later </font><code class="western"><font size="3" style="font-size: 12pt">einsteinQuotes.push(quote.quoteText);</font></code><font size="3" style="font-size: 12pt">
+	is a solution for how to move items from one array into another. </font>
+	</p>
+</ul>
+<p><font size="3" style="font-size: 12pt">Neither of these things are
+clearly related to the purpose of our function, our ‘business
+logic’. For a reader of the code they serve as ‘fuzz’ or
+obfuscation to quickly understanding what the function does.</font></p>
+<h2 class="western"><a name="second-attempt-for--of-loop"></a><font size="3" style="font-size: 12pt">Second
+attempt: for … of loop</font></h2>
+<p><font size="3" style="font-size: 12pt">Now let’s see how we can
+solve the same problem using a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of">for
+… of</a> loop.</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">/**</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">* Loop over the data with a for ... of loop, use an if statement</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">* in order to push only the items we want to an array.</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">*/</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">function getEinsteinQuotesList(quotes) {</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">const einsteinQuotes = [];</font></code>
+
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">for (let quote of quotes) {</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">if (quote.quoteAuthor.includes('Einstein')) {</font></code>
+<code class="western">      </code><code class="western"><font size="3" style="font-size: 12pt">einsteinQuotes.push(quote.quoteText);</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">}</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">}</font></code>
+
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">return einsteinQuotes;</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">}</font></code>
+</pre><p>
+<font size="3" style="font-size: 12pt">This is slightly better than
+the </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">
+loop method, but still not perfect.</font></p>
+<p><font size="3" style="font-size: 12pt">The </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> loop
+iterates over each item in the array in order. Unlike with the </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">
+loop, we do not have to manually write any logic for the control flow
+of the loop.</font></p>
+<h2 class="western"><a name="third-attempt-filter-and-map"></a><font size="3" style="font-size: 12pt">Third
+attempt: <span style="background: #ffff00">filter</span> and <span style="background: #ffff00">map</span></font></h2>
+<p><font size="3" style="font-size: 12pt">Now for what I consider to
+be the best solution, using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter">filter</a>
+and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map">map</a>:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">/**</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">* Transform the quotes data using filter and map.</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">*/</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">function getEinsteinQuotesList(quotes) {</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">return quotes</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">.filter(q =&gt; q.quoteAuthor.includes(&quot;Einstein&quot;))</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">.map(q =&gt; q.quoteText);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">}</font></code></pre><p>
+<font size="3" style="font-size: 12pt">Here we take a very different
+approach to either of the first 2 attempts.</font></p>
+<ul>
+	<li><p><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+	takes the quotes array and executes a predicate function (a function
+	which returns </font><code class="western"><font size="3" style="font-size: 12pt">true</font></code><font size="3" style="font-size: 12pt">
+	or </font><code class="western"><font size="3" style="font-size: 12pt">false</font></code><font size="3" style="font-size: 12pt">)
+	for each item in the array. The function acts as a test to calculate
+	which items should be filtered out. </font>
+	</p>
+	<p><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+	then returns a new array containing all items for which the
+	predicate function returns </font><code class="western"><font size="3" style="font-size: 12pt">true</font></code><font size="3" style="font-size: 12pt">.</font></p>
+	<li><p><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+	takes the filtered quotes array and executes a callback function for
+	each item in the array. The callback function’s job is simply to
+	take a single array item and return a new value (in this case the
+	</font><code class="western"><font size="3" style="font-size: 12pt">quoteText</font></code><font size="3" style="font-size: 12pt">).
+	</font>
+	</p>
+	<p><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+	returns a new array containing all of these mapped values.</font></p>
+</ul>
+<p><font size="3" style="font-size: 12pt">Each of these functions
+returns an array, which is why they can be chained as they are above.
+Also, note how </font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+both </font>
+</p>
+<p><font size="3" style="font-size: 12pt">take a function as a
+parameter - we call functions like this </font>
+</p>
+<p><font size="3" style="font-size: 12pt">higher order functions.</font></p>
+<p><font size="3" style="font-size: 12pt">The advantages of this
+approach are mostly with readability and conciseness:</font></p>
+<ul>
+	<li><p style="margin-bottom: 0cm"><font size="3" style="font-size: 12pt">We
+	have no need to explicitly create an empty array and append to it,
+	our chained filter and map functions return an array of results. </font>
+	</p>
+	<li><p><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+	and </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+	are very readable and declarative - the name of the method instantly
+	tells us a lot the operation we are performing on the data (unlike
+	the </font><code class="western"><font size="3" style="font-size: 12pt">for
+	... of</font></code><font size="3" style="font-size: 12pt"> loop),
+	and we do not need to manually write any control flow logic for
+	iterating over the array, (unlike the </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">
+	loop). </font>
+	</p>
+</ul>
+<p><font size="3" style="font-size: 12pt">This type of solution is
+particularly favoured by those who are familiar with functional
+programming. This is because it relies on manipulating the data using
+<a href="https://willtaylor.blog/javascript-pure-functions/">pure
+functions</a>, and does not mutate any state. Learning to use these
+JavaScript array methods can act as a gateway or introduction to
+learning functional programming.</font></p>
+<p><br/>
+<br/>
+
+</p>
+<h2 class="western"><a name="bonus-attempt-reduce"></a><font size="3" style="font-size: 12pt">Bonus
+attempt: <span style="background: #ffff00">reduce</span></font></h2>
+<p><font size="3" style="font-size: 12pt">Finally, lets look at how
+we can implement the same function using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce">reduce</a>:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">/**</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">* Transform the quotes data using reduce.</font></code>
+<code class="western"> </code><code class="western"><font size="3" style="font-size: 12pt">*/</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">function getEinsteinQuotesList(quotes) {</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">return quotes.reduce(</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">(accumulator, q) =&gt; q.quoteAuthor.includes(&quot;Einstein&quot;) ? [ ...accumulator, q.quoteText ]: accumulator, </font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">[]);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">}</font></code></pre><p>
+<font size="3" style="font-size: 12pt">So this one takes a little
+longer to get your head around, hence I would generally recommend
+using </font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+as the optimum solution (for all but performance).</font></p>
+<p><font size="3" style="font-size: 12pt">However, it is worth taking
+a look at, and noting that any operation which can be performed using
+a combination of </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+can also be performed using a single </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+function.</font></p>
+<p><font size="3" style="font-size: 12pt">The idea is that </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+iterates over an array, passing accumulated state from one iteration
+to the next - the final result is the return value of the final
+iteration.</font></p>
+<p><font size="3" style="font-size: 12pt">In the above, the second
+argument is an empty array - this is the value passed as the
+</font><code class="western"><font size="3" style="font-size: 12pt">accumulator</font></code><font size="3" style="font-size: 12pt">
+parameter for the first iteration. Each iteration then returns either
+just returns </font><code class="western"><font size="3" style="font-size: 12pt">accumulator</font></code><font size="3" style="font-size: 12pt">
+if the quote is not an Einstein quote, or a new array containing the
+contents of </font><code class="western"><font size="3" style="font-size: 12pt">accumulator</font></code><font size="3" style="font-size: 12pt">
+and the </font><code class="western"><font size="3" style="font-size: 12pt">quoteText</font></code><font size="3" style="font-size: 12pt">
+of the current quote if it is an Einstein quote.</font></p>
+<p><font size="3" style="font-size: 12pt">This is the hardest of
+these 3 functions to get your head around, but it has many
+interesting uses which I will talk about later in this article.</font></p>
+<h1><a name="performance"></a><font size="3" style="font-size: 12pt">Performance</font></h1>
+<p><font size="3" style="font-size: 12pt">The </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">
+loop and </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> loop (and
+</font><code class="western"><font size="3" style="font-size: 12pt">forEach</font></code><font size="3" style="font-size: 12pt">
+function) are <a href="https://www.youtube.com/watch?v=m9cTaYI95Zc&amp;feature=youtu.be&amp;t=951">equivalent
+performance wise</a> in modern JS engines.</font></p>
+<p><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">,
+</font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+are <a href="https://dev.to/henryjw/array-map-much-slower-than-for-loop-57if">generally
+a bit slower</a> than the </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> loops,
+especially when working with large data sets.</font></p>
+<p><font size="3" style="font-size: 12pt">In our example, the main
+thing I would like to point out is how in our third attempt, we
+chained </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">,
+resulting in the function iterating over each array element twice,
+and creating a new array twice (</font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+returns a new array, and so does </font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">).</font></p>
+<p><font size="3" style="font-size: 12pt">It is worth thinking about
+the fact that when you chain array methods like this, the array will
+be iterated over and a new array created for each method in the
+chain.</font></p>
+<p><font size="3" style="font-size: 12pt">All in all attempt 3 is
+almost definitely the least performant, and yet generally it is still
+probably the best approach for most situations, especially if you are
+working with a small or medium sized data set. As a general rule,
+unless you strongly suspect or can show that the code you are working
+on is a performance bottleneck, it is better to write readable and
+maintainable code and refactor later on.</font></p>
+<h1><a name="should-i-ever-use-for-or-for--of"></a><font size="3" style="font-size: 12pt">Should
+I ever use </font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">
+or </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt">?</font></h1>
+<p><font size="3" style="font-size: 12pt">Yes, </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> has many
+good uses (I would personally always use </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> over
+</font><code class="western"><font size="3" style="font-size: 12pt">for</font></code><font size="3" style="font-size: 12pt">).</font></p>
+<p><font size="3" style="font-size: 12pt">Firstly, as discussed above
+</font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> can be
+more performant in certain cases.</font></p>
+<p><font size="3" style="font-size: 12pt">Secondly, </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> can and
+should be used for executing side effects, for example, a call to the
+DOM API. In fact, going back to our <a href="https://stackblitz.com/edit/es6-filtermapreduce">Einstein
+quotes example</a>, lets take a look at the </font><code class="western"><font size="3" style="font-size: 12pt">appendQuotesToDOM</font></code><font size="3" style="font-size: 12pt">
+function:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">function appendQuotesToDOM(quotes) {</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">const ul = document.getElementById(&quot;quotes&quot;);</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">// Use a fragment to minise no of DOM reflows (check this)</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">const fragment = document.createDocumentFragment();</font></code>
+
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">// Foreach is appropriate here, as this is a side effect.</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">for (let quote of quotes) {</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">const el = document.createElement(&quot;li&quot;);</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">el.appendChild(document.createTextNode(quote));</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">fragment.appendChild(el);</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">};</font></code>
+
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">ul.appendChild(fragment);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">}</font></code></pre><p>
+<font size="3" style="font-size: 12pt">Here we use a </font><code class="western"><font size="3" style="font-size: 12pt">for
+... of</font></code><font size="3" style="font-size: 12pt"> loop in
+order to append each list item to the document fragment. In this case
+we are not transforming a data set, we are performing the side effect
+of appending to a DOM fragment - to use </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+for this would be possible but not advisable because:</font></p>
+<ol>
+	<li><p style="margin-bottom: 0cm"><font size="3" style="font-size: 12pt">By
+	convention, the callback provided to </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+	should be a <a href="https://willtaylor.blog/javascript-pure-functions/">pure
+	function</a> which ‘projects’ or ‘maps’ one value to
+	another. </font>
+	</p>
+	<li><p><font size="3" style="font-size: 12pt">The callback passed to
+	</font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+	returns a value each time it is called, and </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+	will return an array of those values - but here, we would not have
+	any need for this array of returned values. </font>
+	</p>
+</ol>
+<p><font size="3" style="font-size: 12pt">All in all, if we were to
+use </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+here, it would make our code less readable/reasonable, as we would be
+bending it to do something that most developers would not expect </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">
+to be used for.</font></p>
+<h1><a name="further-examples-of-reduce"></a><font size="3" style="font-size: 12pt">Further
+examples of <span style="background: #ffff00">reduce</span></font></h1>
+<p><font size="3" style="font-size: 12pt">While in our above example
+</font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+did not turn out to be the best solution, this does really not do it
+justice. </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+is perhaps the most powerful of these 3 array methods and it has many
+interesting use cases.</font></p>
+<h2 class="western"><a name="summing-an-array"></a><font size="3" style="font-size: 12pt">Summing
+an array</font></h2>
+<p><font size="3" style="font-size: 12pt">Finding the sum of an array
+of numbers is one of the best examples to help you understand how
+</font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+works.</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">const sumArray = (arr) =&gt; arr.reduce((acc, n) =&gt; return acc + n);</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">const sum = sumArray([1,2,3,4,5]);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">console.log(sum); // 15</font></code></pre><p>
+<font size="3" style="font-size: 12pt">Each iteration returns the
+running total. We could have provided </font><code class="western"><font size="3" style="font-size: 12pt">0</font></code><font size="3" style="font-size: 12pt">
+as the second argument to </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+and it would have been used as an initial value, but we did not.</font></p>
+<p><font size="3" style="font-size: 12pt">Because we did not, the
+first item in the array is skipped and instead gets passed to the </font><code class="western"><font size="3" style="font-size: 12pt">acc</font></code><font size="3" style="font-size: 12pt">
+parameter for the first iteration. ie. for the first iteration </font><code class="western"><font size="3" style="font-size: 12pt">acc</font></code><font size="3" style="font-size: 12pt">
+is </font><code class="western"><font size="3" style="font-size: 12pt">1</font></code><font size="3" style="font-size: 12pt">,
+</font><code class="western"><font size="3" style="font-size: 12pt">n</font></code><font size="3" style="font-size: 12pt">
+is </font><code class="western"><font size="3" style="font-size: 12pt">2</font></code><font size="3" style="font-size: 12pt">.</font></p>
+<h2 class="western"><a name="converting-an-array-to-a-dictionary"></a>
+<font size="3" style="font-size: 12pt">Converting an array to a
+dictionary</font></h2>
+<p><font size="3" style="font-size: 12pt">This is an example of
+</font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+is a function which I have used in real projects. It converts an
+array of objects to a dictionary (ie. actually just a plain JS
+object) keyed by a specified property:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">const createDictionary = (arr, key) =&gt; {</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">return arr.reduce((dict, obj) =&gt; {</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">dict[obj[key]] = obj;</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">return dict;</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">}, {});</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">}</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">const myArray = [</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">{ id: '174d0a85', name: 'Jimmy' },</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">{ id: '9b7e77e2', name: 'Sarah' },</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">]</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">const myDict = createDictionary(myArray, 'id');</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">console.log(myDict);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">// {</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">//   '174d0a85': { id: '174d0a85', name: 'Jimmy' },</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">//   '9b7e77e2': { id: '9b7e77e2', name: 'Sarah' },</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">// }</font></code></pre><h2 class="western">
+<a name="implementing-pipe-and-compose-functions"></a><font size="3" style="font-size: 12pt">Implementing
+pipe and compose functions</font></h2>
+<p><font size="3" style="font-size: 12pt">This is a great example of
+</font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+for those interested in functional programming.</font></p>
+<p><font size="3" style="font-size: 12pt">In functional programming,
+we are often concerned with composing functions. For this, </font><code class="western"><font size="3" style="font-size: 12pt">pipe</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">compose</font></code><font size="3" style="font-size: 12pt">
+functions are often used.</font></p>
+<p><font size="3" style="font-size: 12pt">If you are not familiar
+with functions like </font><code class="western"><font size="3" style="font-size: 12pt">pipe</font></code><font size="3" style="font-size: 12pt">
+(or </font><code class="western"><font size="3" style="font-size: 12pt">compose</font></code><font size="3" style="font-size: 12pt">)
+don’t worry, the purpose is essentially to pass any number of
+functions to </font><code class="western"><font size="3" style="font-size: 12pt">pipe</font></code><font size="3" style="font-size: 12pt">
+(or </font><code class="western"><font size="3" style="font-size: 12pt">compose</font></code><font size="3" style="font-size: 12pt">),
+and have it return a function which, when called, will pass the
+return value of each of these functions from one to the next, with
+</font><code class="western"><font size="3" style="font-size: 12pt">pipe</font></code><font size="3" style="font-size: 12pt">
+finally returning the return value of the final function passed to
+it.</font></p>
+<p><font size="3" style="font-size: 12pt">The only difference between
+</font><code class="western"><font size="3" style="font-size: 12pt">pipe</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">compose</font></code><font size="3" style="font-size: 12pt">
+is that </font>
+</p>
+<p><code class="western"><font size="3" style="font-size: 12pt"><span style="background: #ffff00">pipe</span></font></code><font size="3" style="font-size: 12pt">
+calls the functions passed to it from </font><font size="3" style="font-size: 12pt"><span style="background: #ffff00">left
+to right</span></font><font size="3" style="font-size: 12pt">, while </font>
+</p>
+<p><code class="western"><font size="3" style="font-size: 12pt"><span style="background: #ffff00">compose</span></font></code><font size="3" style="font-size: 12pt">
+calls the functions passed to it from </font><font size="3" style="font-size: 12pt"><span style="background: #ffff00">right
+to left</span></font><font size="3" style="font-size: 12pt">.</font></p>
+<p><code class="western"><font size="3" style="font-size: 12pt">pipe</font></code><font size="3" style="font-size: 12pt">
+can be implemented using </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">,
+and then used, as follows:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">const pipe = (...fns) =&gt; x =&gt; fns.reduce((v, f) =&gt; f(v), x);</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">// The functions which we will compose using pipe.</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">const subtract1 = x =&gt; x - 1;</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">const square = x =&gt; x * x;</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">const add1 = x =&gt; x + 1;</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">const subtract1ThenSquareThenAdd1 = pipe(subtract1, square, add1);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">const result = subtract1ThenSquareThenAdd1(6);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">console.log(result); // 26</font></code></pre><p>
+<font size="3" style="font-size: 12pt">Here, it helps to think of our
+reduce as building as passing the results of the return value of one
+function call to the next in a nested fashion. ie. we can
+conceptualise our piped function as being (a function) equivalent to
+the following:</font></p>
+<pre class="western" style="margin-bottom: 0.5cm"><code class="western"><font size="3" style="font-size: 12pt">const subtract1ThenSquareThenAdd1 = x =&gt; add1(square(subtract1(x)));</font></code></pre><p>
+<code class="western"><font size="3" style="font-size: 12pt">compose</font></code><font size="3" style="font-size: 12pt">
+can be implemented using a very similar JavaScript array method,
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduceRight">reduceRight</a>.
+This method is exactly the same as </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">,
+except that it iterates through the array backwards:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">const compose = (...fns) =&gt; x =&gt; fns.reduceRight((v, f) =&gt; f(v), x);</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">// The functions which we will compose.</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">const subtract1 = x =&gt; x - 1;</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">const square = x =&gt; x * x;</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">const add1 = x =&gt; x + 1;</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">const add1ThenSquareThenSubtract1 = compose(subtract1, square, add1)</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">const result = add1ThenSquareThenSubtract1(6);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">console.log(result); // 48</font></code></pre><p>
+<code class="western"><font size="3" style="font-size: 12pt">compose</font></code><font size="3" style="font-size: 12pt">
+does exactly the same as </font><code class="western"><font size="3" style="font-size: 12pt">pipe</font></code><font size="3" style="font-size: 12pt">,
+but calls the functions pass to it from right to left. We can
+conceptualise our composed function as being (a function) equivalent
+to the following:</font></p>
+<pre class="western" style="margin-bottom: 0.5cm"><code class="western"><font size="3" style="font-size: 12pt">const subtract1ThenSquareThenAdd1 = x =&gt; subtract1(square(add1(x)));</font></code></pre><h2 class="western">
+<a name="sequentially-resolving-promises"></a><font size="3" style="font-size: 12pt">Sequentially
+resolving promises</font></h2>
+<p><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+can be used to chain promises so that they execute sequentially. Lets
+look at a simple example where we fetch data from a number of API
+endpoints:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">const urls = [</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">'<a href="https://some-api.com/endpoint1">https://some-api.com/endpoint1</a>',</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">'<a href="https://some-api.com/endpoint2">https://some-api.com/endpoint2</a>',</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">'<a href="https://some-api.com/endpoint3">https://some-api.com/endpoint3</a>',</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">];</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">urls.reduce((previousPromise, url) =&gt; {</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">return previousPromise.then(() =&gt; {</font></code>
+<code class="western">    </code><code class="western"><font size="3" style="font-size: 12pt">return fetch(url);</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">});</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">}, Promise.resolve());</font></code></pre><p>
+<font size="3" style="font-size: 12pt">Each of these requests will be
+made sequentially - the next one being made when the previous one has
+received a response.</font></p>
+<p><font size="3" style="font-size: 12pt">If we unwrap this mentally,
+we can think it as essentially building a promise chain using </font><code class="western"><font size="3" style="font-size: 12pt">then</font></code><font size="3" style="font-size: 12pt">.
+And if you are familiar with promises, of course each </font><code class="western"><font size="3" style="font-size: 12pt">then</font></code><font size="3" style="font-size: 12pt">
+is executed only once the previous one has resolved. </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">
+creates a chain of promises equivalent to this:</font></p>
+<pre class="western" style="margin-bottom: 0.5cm"><code class="western"><font size="3" style="font-size: 12pt">fetch(() =&gt; urls[0]).then(() =&gt; fetch(urls[1])).then(() =&gt; fetch(urls[2]));</font></code></pre><p>
+<font size="3" style="font-size: 12pt">Alternatively, using modern
+</font><code class="western"><font size="3" style="font-size: 12pt">async</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">await</font></code><font size="3" style="font-size: 12pt">
+syntax:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">const urls = [</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">'<a href="https://some-api.com/endpoint1">https://some-api.com/endpoint1</a>',</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">'<a href="https://some-api.com/endpoint2">https://some-api.com/endpoint2</a>',</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">'<a href="https://some-api.com/endpoint3">https://some-api.com/endpoint3</a>',</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">];</font></code>
+
+<code class="western"><font size="3" style="font-size: 12pt">urls.reduce(async (previousPromise, url) =&gt; {</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">await previousPromise;</font></code>
+<code class="western">  </code><code class="western"><font size="3" style="font-size: 12pt">return fetch(url);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">}, Promise.resolve());</font></code></pre><p>
+<font size="3" style="font-size: 12pt">Which we can think of as
+equivalent to:</font></p>
+<pre class="western"><code class="western"><font size="3" style="font-size: 12pt">await fetch(urls[0]);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">await fetch(urls[1]);</font></code>
+<code class="western"><font size="3" style="font-size: 12pt">await fetch(urls[2]);</font></code></pre><h1>
+<a name="conclusion"></a><font size="3" style="font-size: 12pt">Conclusion</font></h1>
+<p><font size="3" style="font-size: 12pt">In this article we looked
+at some examples of how and when to use </font><code class="western"><font size="3" style="font-size: 12pt">map</font></code><font size="3" style="font-size: 12pt">,
+</font><code class="western"><font size="3" style="font-size: 12pt">filter</font></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><font size="3" style="font-size: 12pt">reduce</font></code><font size="3" style="font-size: 12pt">,
+and hopefully this has given you some further insight into how these
+functions work.</font></p>
+<p><font size="3" style="font-size: 12pt">Now that you understand
+these 3 methods, there are many other useful array methods you can
+learn such as </font>
+</p>
+<p><font size="3" style="font-size: 12pt"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some">some</a>,
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every">every</a>,
+</font><code class="western"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes"><font size="3" style="font-size: 12pt">includes</font></a></code><font size="3" style="font-size: 12pt">
+and </font><code class="western"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find"><font size="3" style="font-size: 12pt">find</font></a></code><font size="3" style="font-size: 12pt">.
+And for more advanced data manipulation with arrays there are
+libraries such as <a href="https://lodash.com/">lodash</a>, or for a
+more functional approach, <a href="https://ramdajs.com/">ramda</a>.</font></p>
+<h1><a name="useful-resources"></a><font size="3" style="font-size: 12pt">Useful
+Resources</font></h1>
+<p><font size="3" style="font-size: 12pt">If you are looking to learn
+about JavaScript arrays in more depth, I recommend the following
+course (affiliate link):</font></p>
+<ul>
+	<li><p><font size="3" style="font-size: 12pt"><a href="https://click.linksynergy.com/link?id=5FPU6FRy5w4&amp;offerid=507388.2497482&amp;type=2&amp;murl=https%3A%2F%2Fwww.udemy.com%2Fcourse%2Fmastering-javascript-arrays%2F">Mastering
+	JavaScript Arrays</a> </font>
+	</p>
+</ul>
+<p><font size="3" style="font-size: 12pt">In addition, the following
+were really helpful for writing this article, and I very much
+recommend them as further reading:</font></p>
+<ul>
+	<li><p style="margin-bottom: 0cm"><font size="3" style="font-size: 12pt"><a href="https://css-tricks.com/why-using-reduce-to-sequentially-resolve-promises-works/">https://css-tricks.com/why-using-reduce-to-sequentially-resolve-promises-works/</a>
+	</font>
+	</p>
+	<li><p style="margin-bottom: 0cm"><font size="3" style="font-size: 12pt"><a href="https://medium.com/free-code-camp/10-ways-to-write-pipe-compose-in-javascript-f6d54c575616">https://medium.com/free-code-camp/10-ways-to-write-pipe-compose-in-javascript-f6d54c575616</a>
+	</font>
+	</p>
+	<li><p><font size="3" style="font-size: 12pt"><a href="https://thecodebarbarian.com/for-vs-for-each-vs-for-in-vs-for-of-in-javascript.html">https://thecodebarbarian.com/for-vs-for-each-vs-for-in-vs-for-of-in-javascript.html</a>
+	</font>
+	</p>
+</ul>
+<p style="margin-bottom: 0cm"><font size="3" style="font-size: 12pt">February
+17, 2020 </font>
+</p>
+<p><br/>
+<br/>
+
+</p>
+</body>
+</html>
