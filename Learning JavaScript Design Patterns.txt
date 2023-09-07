@@ -1,0 +1,6 @@
+Addy Osmani
+Learning JavaScript Design Patterns: 2nd Edition - The Examples
+https://github.com/addyosmani/learning-jsdp
+https://addyosmani.com/
+https://addyosmani.com/learning-jsdp/
+https://patterns.dev/
