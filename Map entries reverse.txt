@@ -1,0 +1,26 @@
+JavaScript Map entries reverse
+JavaScript new Map( entries reverse
+JavaScript "new Map(" entries reverse
+
+let m = new Map([['a', 'apple'], ['b', 'banana']]);
+let r = new Map([...m].reverse());
+
+console.log([...m]);
+console.log([...r]);
+
+[LOG]: [["a", "apple"], ["b", "banana"]] 
+[LOG]: [["b", "banana"], ["a", "apple"]] 
+
+
+
+let map = new Map([
+  [100, 'JavaScript'],
+  [130, 'CSS'],
+  [23, 'HTML'],
+]);
+
+console.log(new Map([...map.entries()].sort()));
+console.log(new Map([...map.entries()].reverse()));
+
+[LOG]: Map (3) {100 => "JavaScript", 130 => "CSS", 23 => "HTML"}
+[LOG]: Map (3) {23 => "HTML", 130 => "CSS", 100 => "JavaScript"}
