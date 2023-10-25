@@ -1,0 +1,11 @@
+Blog
+
+covariance and contravariance
+https://www.stephanboyer.com/post/132/what-are-covariance-and-contravariance
+
+
+https://codewithstyle.info/
+
+
+
+https://blog.alexdevero.com/javascript-reduce-method/
